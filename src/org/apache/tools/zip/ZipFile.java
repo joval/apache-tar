@@ -38,7 +38,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipException;
@@ -86,13 +85,13 @@ public class ZipFile implements Closeable {
      * List of entries in the order they appear inside the central
      * directory.
      */
-    private final List<ZipEntry> entries = new LinkedList<>();
+    private final List<ZipEntry> entries = new LinkedList<ZipEntry>();
 
     /**
      * Maps String to list of ZipEntrys, name -> actual entries.
      */
     private final Map<String, LinkedList<ZipEntry>> nameMap =
-        new HashMap<>(HASH_SIZE);
+        new HashMap<String, LinkedList<ZipEntry>>(HASH_SIZE);
 
     private static final class OffsetEntry {
         private long headerOffset = -1;
@@ -289,8 +288,9 @@ public class ZipFile implements Closeable {
      * @since Ant 1.9.0
      */
     public Enumeration<ZipEntry> getEntriesInPhysicalOrder() {
-        return entries.stream().sorted(OFFSET_COMPARATOR).collect(Collectors
-            .collectingAndThen(Collectors.toList(), Collections::enumeration));
+	ZipEntry[] sorted = entries.toArray(new ZipEntry[entries.size()]);
+	Arrays.sort(sorted, OFFSET_COMPARATOR);
+	return Collections.<ZipEntry>enumeration(Arrays.<ZipEntry>asList(sorted));
     }
 
     /**
@@ -321,8 +321,7 @@ public class ZipFile implements Closeable {
      */
     public Iterable<ZipEntry> getEntries(final String name) {
         final List<ZipEntry> entriesOfThatName = nameMap.get(name);
-        return entriesOfThatName != null ? entriesOfThatName
-            : Collections.emptyList();
+        return entriesOfThatName != null ? entriesOfThatName : Collections.<ZipEntry>emptyList();
     }
 
     /**
@@ -336,10 +335,12 @@ public class ZipFile implements Closeable {
      */
     public Iterable<ZipEntry> getEntriesInPhysicalOrder(final String name) {
         if (nameMap.containsKey(name)) {
-            return nameMap.get(name).stream().sorted(OFFSET_COMPARATOR)
-                .collect(Collectors.toList());
+	    List<ZipEntry> entry = nameMap.get(name);
+	    ZipEntry[] sorted = entry.<ZipEntry>toArray(new ZipEntry[entry.size()]);
+	    Arrays.sort(sorted, OFFSET_COMPARATOR);
+	    return Arrays.<ZipEntry>asList(sorted);
         }
-        return Collections.emptyList();
+        return Collections.<ZipEntry>emptyList();
     }
 
     /**
@@ -451,7 +452,7 @@ public class ZipFile implements Closeable {
      */
     private Map<ZipEntry, NameAndComment> populateFromCentralDirectory()
         throws IOException {
-        final Map<ZipEntry, NameAndComment> noUTF8Flag = new HashMap<>();
+        final Map<ZipEntry, NameAndComment> noUTF8Flag = new HashMap<ZipEntry, NameAndComment>();
 
         positionAtCentralDirectory();
 
@@ -889,7 +890,11 @@ public class ZipFile implements Closeable {
             }
 
             final String name = ze.getName();
-            LinkedList<ZipEntry> entriesOfThatName = nameMap.computeIfAbsent(name, k -> new LinkedList<>());
+            LinkedList<ZipEntry> entriesOfThatName;
+            if (!nameMap.containsKey(name)) {
+                nameMap.put(name, new LinkedList<ZipEntry>());
+            }
+            entriesOfThatName = nameMap.get(name);
             entriesOfThatName.addLast(ze);
         }
     }
@@ -990,22 +995,30 @@ public class ZipFile implements Closeable {
      *
      * @since Ant 1.9.0
      */
-    private final Comparator<ZipEntry> OFFSET_COMPARATOR = (e1, e2) -> {
-        if (e1 == e2) {
-            return 0;
+    private final Comparator<ZipEntry> OFFSET_COMPARATOR = new Comparator<ZipEntry>() {
+        @Override
+	public int compare(ZipEntry e1, ZipEntry e2) {
+            if (e1 == e2) {
+                return 0;
+            }
+
+            final Entry ent1 = e1 instanceof Entry ? (Entry) e1 : null;
+            final Entry ent2 = e2 instanceof Entry ? (Entry) e2 : null;
+            if (ent1 == null) {
+                return 1;
+            }
+            if (ent2 == null) {
+                return -1;
+            }
+            final long val = (ent1.getOffsetEntry().headerOffset
+                        - ent2.getOffsetEntry().headerOffset);
+            return val == 0 ? 0 : val < 0 ? -1 : +1;
         }
 
-        final Entry ent1 = e1 instanceof Entry ? (Entry) e1 : null;
-        final Entry ent2 = e2 instanceof Entry ? (Entry) e2 : null;
-        if (ent1 == null) {
-            return 1;
+        @Override
+        public boolean equals(Object obj) {
+	    return this.equals(obj);
         }
-        if (ent2 == null) {
-            return -1;
-        }
-        final long val = (ent1.getOffsetEntry().headerOffset
-                    - ent2.getOffsetEntry().headerOffset);
-        return val == 0 ? 0 : val < 0 ? -1 : +1;
     };
 
     /**

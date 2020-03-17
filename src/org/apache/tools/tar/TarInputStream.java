@@ -418,7 +418,7 @@ public class TarInputStream extends FilterInputStream {
     }
 
     Map<String, String> parsePaxHeaders(InputStream i) throws IOException {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new HashMap<String, String>();
         // Format is "length keyword=value\n";
         while (true) { // get length
             int ch;
@@ -479,40 +479,31 @@ public class TarInputStream extends FilterInputStream {
          * uid,uname
          * SCHILY.devminor, SCHILY.devmajor: don't have setters/getters for those
          */
-        headers.forEach((key, val) -> {
-            switch (key) {
-                case "path":
-                    currEntry.setName(val);
-                    break;
-                case "linkpath":
-                    currEntry.setLinkName(val);
-                    break;
-                case "gid":
-                    currEntry.setGroupId(Long.parseLong(val));
-                    break;
-                case "gname":
-                    currEntry.setGroupName(val);
-                    break;
-                case "uid":
-                    currEntry.setUserId(Long.parseLong(val));
-                    break;
-                case "uname":
-                    currEntry.setUserName(val);
-                    break;
-                case "size":
-                    currEntry.setSize(Long.parseLong(val));
-                    break;
-                case "mtime":
-                    currEntry.setModTime((long) (Double.parseDouble(val) * 1000));
-                    break;
-                case "SCHILY.devminor":
-                    currEntry.setDevMinor(Integer.parseInt(val));
-                    break;
-                case "SCHILY.devmajor":
-                    currEntry.setDevMajor(Integer.parseInt(val));
-                    break;
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            String key = entry.getKey();
+            String val = entry.getValue();
+            if (key.equals("path")) {
+                currEntry.setName(val);
+            } else if (key.equals("linkpath")) {
+                currEntry.setLinkName(val);
+            } else if (key.equals("gid")) {
+                currEntry.setGroupId(Long.parseLong(val));
+            } else if (key.equals("gname")) {
+                currEntry.setGroupName(val);
+            } else if (key.equals("uid")) {
+                currEntry.setUserId(Long.parseLong(val));
+            } else if (key.equals("uname")) {
+                currEntry.setUserName(val);
+            } else if (key.equals("size")) {
+                currEntry.setSize(Long.parseLong(val));
+            } else if (key.equals("mtime")) {
+                currEntry.setModTime((long) (Double.parseDouble(val) * 1000));
+            } else if (key.equals("SCHILY.devminor")) {
+                currEntry.setDevMinor(Integer.parseInt(val));
+            } else if (key.equals("SCHILY.devmajor")) {
+                currEntry.setDevMajor(Integer.parseInt(val));
             }
-        });
+        }
     }
 
     /**

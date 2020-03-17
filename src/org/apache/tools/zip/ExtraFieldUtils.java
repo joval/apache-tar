@@ -41,7 +41,7 @@ public class ExtraFieldUtils {
     private static final Map<ZipShort, Class<?>> implementations;
 
     static {
-        implementations = new ConcurrentHashMap<>();
+        implementations = new ConcurrentHashMap<ZipShort, Class<?>>();
         register(AsiExtraField.class);
         register(JarMarker.class);
         register(UnicodePathExtraField.class);
@@ -133,7 +133,7 @@ public class ExtraFieldUtils {
     public static ZipExtraField[] parse(byte[] data, boolean local,
                                         UnparseableExtraField onUnparseableData)
         throws ZipException {
-        List<ZipExtraField> v = new ArrayList<>();
+        List<ZipExtraField> v = new ArrayList<ZipExtraField>();
         int start = 0;
         LOOP:
         while (start <= data.length - WORD) {
@@ -174,7 +174,9 @@ public class ExtraFieldUtils {
                         .parseFromCentralDirectoryData(data, start + WORD, length);
                 }
                 v.add(ze);
-            } catch (InstantiationException | IllegalAccessException ie) {
+            } catch (InstantiationException ie) {
+                throw new ZipException(ie.getMessage());
+            } catch (IllegalAccessException ie) {
                 throw new ZipException(ie.getMessage());
             }
             start += (length + WORD);
