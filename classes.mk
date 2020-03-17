@@ -1,0 +1,37 @@
+CLASSES=\
+	org.apache.tools.tar.TarConstants	\
+	org.apache.tools.tar.TarArchiveSparseEntry	\
+	org.apache.tools.tar.TarEntry	\
+	org.apache.tools.tar.TarBuffer	\
+	org.apache.tools.tar.TarOutputStream	\
+	org.apache.tools.tar.TarInputStream	\
+	org.apache.tools.tar.TarUtils	\
+	org.apache.tools.zip.ZipUtil	\
+	org.apache.tools.zip.UnixStat	\
+	org.apache.tools.zip.CentralDirectoryParsingZipExtraField	\
+	org.apache.tools.zip.ZipEncodingHelper	\
+	org.apache.tools.zip.ZipOutputStream	\
+	org.apache.tools.zip.AbstractUnicodeExtraField	\
+	org.apache.tools.zip.ZipEntry	\
+	org.apache.tools.zip.AsiExtraField	\
+	org.apache.tools.zip.Zip64ExtendedInformationExtraField	\
+	org.apache.tools.zip.Simple8BitZipEncoding	\
+	org.apache.tools.zip.ZipLong	\
+	org.apache.tools.zip.JarMarker	\
+	org.apache.tools.zip.ExtraFieldUtils	\
+	org.apache.tools.zip.UnrecognizedExtraField	\
+	org.apache.tools.zip.ZipFile	\
+	org.apache.tools.zip.GeneralPurposeBit	\
+	org.apache.tools.zip.ZipShort	\
+	org.apache.tools.zip.ZipExtraField	\
+	org.apache.tools.zip.ZipConstants	\
+	org.apache.tools.zip.FallbackZipEncoding	\
+	org.apache.tools.zip.UnicodePathExtraField	\
+	org.apache.tools.zip.NioZipEncoding	\
+	org.apache.tools.zip.ZipEncoding	\
+	org.apache.tools.zip.UnsupportedZipFeatureException	\
+	org.apache.tools.zip.UnicodeCommentExtraField	\
+	org.apache.tools.zip.Zip64RequiredException	\
+	org.apache.tools.zip.ZipEightByteInteger	\
+	org.apache.tools.zip.UnparseableExtraFieldData	\
+	org.apache.tools.zip.Zip64Mode
