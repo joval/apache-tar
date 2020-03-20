@@ -1014,11 +1014,6 @@ public class ZipFile implements Closeable {
                         - ent2.getOffsetEntry().headerOffset);
             return val == 0 ? 0 : val < 0 ? -1 : +1;
         }
-
-        @Override
-        public boolean equals(Object obj) {
-	    return this.equals(obj);
-        }
     };
 
     /**
