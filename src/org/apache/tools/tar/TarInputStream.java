@@ -275,8 +275,12 @@ public class TarInputStream extends FilterInputStream {
             while (numToSkip > 0) {
                 long skipped = skip(numToSkip);
                 if (skipped <= 0) {
-                    throw new IOException("failed to skip current tar"
-                                               + " entry");
+                    throw new IOException("failed to skip current tar entry '"
+                        + currEntry.getName() + "' SZ "
+                        + entrySize + " OFF "
+                        + entryOffset + " attempted "
+                        + numToSkip + " bytes, skipped "
+                        + skipped + " bytes");
                 }
                 numToSkip -= skipped;
             }
@@ -412,24 +416,18 @@ public class TarInputStream extends FilterInputStream {
     }
 
     private void paxHeaders() throws IOException {
-        Map<String, String> headers = parsePaxHeaders(this);
-        getNextEntry(); // Get the actual file entry
-        applyPaxHeadersToCurrentEntry(headers);
-    }
-
-    Map<String, String> parsePaxHeaders(InputStream i) throws IOException {
         Map<String, String> headers = new HashMap<String, String>();
         // Format is "length keyword=value\n";
         while (true) { // get length
             int ch;
             int len = 0;
             int read = 0;
-            while ((ch = i.read()) != -1) {
+            while ((ch = read()) != -1) {
                 read++;
                 if (ch == ' ') { // End of length string
                     // Get keyword
                     ByteArrayOutputStream coll = new ByteArrayOutputStream();
-                    while ((ch = i.read()) != -1) {
+                    while ((ch = read()) != -1) {
                         read++;
                         if (ch == '=') { // end of keyword
                             String keyword = coll.toString("UTF-8");
@@ -437,7 +435,7 @@ public class TarInputStream extends FilterInputStream {
                             final int restLen = len - read;
                             byte[] rest = new byte[restLen];
                             int got = 0;
-                            while (got < restLen && (ch = i.read()) != -1) {
+                            while (got < restLen && (ch = read()) != -1) {
                                 rest[got++] = (byte) ch;
                             }
                             if (got != restLen) {
@@ -464,7 +462,8 @@ public class TarInputStream extends FilterInputStream {
                 break;
             }
         }
-        return headers;
+        getNextEntry(); // Get the actual file entry
+        applyPaxHeadersToCurrentEntry(headers);
     }
 
     private void applyPaxHeadersToCurrentEntry(Map<String, String> headers) {
@@ -566,7 +565,7 @@ public class TarInputStream extends FilterInputStream {
     public int read(byte[] buf, int offset, int numToRead) throws IOException {
         int totalRead = 0;
 
-        if (entryOffset >= entrySize || isDirectory()) {
+        if (entryOffset >= entrySize) {
             return -1;
         }
 
