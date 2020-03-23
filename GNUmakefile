@@ -50,7 +50,7 @@ clean:
 	rm -rf $(BUILD)
 
 install: tar.jar
-	cp $< $(TOP)/jOVAL-Commercial/components/provider/docker/rsrc/lib
+	cp $< $(TOP)/jOVAL-Commercial/components/provider/offline/rsrc/lib
 
 classes: classdirs $(CLASS_FILES)
 
