@@ -383,7 +383,7 @@ public class TarEntry implements TarConstants {
      * @param name This entry's new name.
      */
     public void setName(String name) {
-        this.name = normalizeFileName(name, false);
+        this.name = normalizeFileName(name, true);
     }
 
     /**
